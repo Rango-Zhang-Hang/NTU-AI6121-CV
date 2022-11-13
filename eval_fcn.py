@@ -7,6 +7,7 @@ import torch
 import torchvision
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
+import cv2
 
 from cycada.data.data_loader import dataset_obj
 from cycada.data.data_loader import get_fcn_dataset
@@ -34,7 +35,7 @@ def remap_labels2rgb(tensor):
       a = tensor[0,i,j]
       out[0,i,j] = palette[a*3]
       out[1,i,j] = palette[a*3+1]
-      out[2,i,j] = palette[a*3+1]  
+      out[2,i,j] = palette[a*3+2]  
   return out
 
 def result_stats(hist):
@@ -80,20 +81,21 @@ def main(path, dataset, datadir, model, gpu, num_cls):
         _, preds = torch.max(score, 1)
         hist += fast_hist(label.numpy().flatten(),
                 preds.cpu().numpy().flatten(),                                                                
-                num_cls)
+                num_cls)        
         a = label.numpy()
-        b = preds.cpu()
+        b = preds.cpu().detach().numpy()
         #print(a.shape())
         #torch.set_printoptions(profile="full")
         #print(b.to_dense())
         #pred_color = color_label(b, palette, with_void=False)
-        plt.figure()
+        #plt.figure()
         pred = remap_labels2rgb(b)
-        pred_img = np.transpose(pred,(1,2,0))
-        plt.imshow(pred_img)
+        pred_img = torch.from_numpy(pred).permute(1,2,0).numpy()
+        #plt.imshow(pred_img)
         path = 'result/pred_' + str(i) + '.png'
-        plt.savefig(path)
-        plt.show()
+        cv2.imwrite(path, pred_img)
+        #plt.savefig(path)
+        #plt.show()
         i += 1
 
         print('====================')
