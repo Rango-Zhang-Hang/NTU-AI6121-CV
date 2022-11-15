@@ -91,6 +91,10 @@ def main(path, dataset, datadir, model, gpu, num_cls):
         #plt.figure()
         pred = remap_labels2rgb(b)
         pred_img = torch.from_numpy(pred).permute(1,2,0).numpy()
+        red = pred_img[:,:,2]
+        blue = pred_img[:,:,0]
+        pred_img[:,:,0] = red
+        pred_img[:,:,2] = blue
         #plt.imshow(pred_img)
         path = 'result/pred_' + str(i) + '.png'
         cv2.imwrite(path, pred_img)
